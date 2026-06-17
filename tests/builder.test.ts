@@ -7,76 +7,100 @@ const baseData: InstagramData = {
   url: 'https://www.instagram.com/p/abc123/',
   title: 'testuser on Instagram',
   description: 'テストキャプション',
-  imageUrl: 'https://example.com/image.jpg',
+  imageUrls: ['https://example.com/image.jpg'],
   authorName: 'testuser',
   publishedAt: '2024-01-15T12:00:00.000Z',
 }
 
 describe('buildEmbed', () => {
   it('description をキャプションとして含む', () => {
-    const embed = buildEmbed(baseData)
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.description).toBe('テストキャプション')
   })
 
-  it('imageUrl を画像として含む', () => {
-    const embed = buildEmbed(baseData)
+  it('最初の画像をメイン Embed に設定する', () => {
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.image?.url).toBe('https://example.com/image.jpg')
   })
 
   it('authorName を author として含む', () => {
-    const embed = buildEmbed(baseData)
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.author?.name).toBe('testuser')
   })
 
   it('URL を含む', () => {
-    const embed = buildEmbed(baseData)
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.url).toBe('https://www.instagram.com/p/abc123/')
   })
 
   it('publishedAt がある場合は timestamp として含む', () => {
-    const embed = buildEmbed(baseData)
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.timestamp).toBe('2024-01-15T12:00:00.000Z')
   })
 
   it('publishedAt が null の場合は timestamp を含まない', () => {
-    const embed = buildEmbed({ ...baseData, publishedAt: null })
+    const [embed] = buildEmbed({ ...baseData, publishedAt: null })
     expect(embed.data.timestamp).toBeUndefined()
   })
 
-  it('imageUrl が null の場合は image を含まない', () => {
-    const embed = buildEmbed({ ...baseData, imageUrl: null })
+  it('imageUrls が空の場合は image を含まない', () => {
+    const [embed] = buildEmbed({ ...baseData, imageUrls: [] })
     expect(embed.data.image).toBeUndefined()
   })
 
   it('reel タイプのタイトルを含む', () => {
-    const embed = buildEmbed({ ...baseData, type: 'reel' })
+    const [embed] = buildEmbed({ ...baseData, type: 'reel' })
     expect(embed.data.title).toContain('Reel')
   })
 
   it('post タイプのタイトルを含む', () => {
-    const embed = buildEmbed(baseData)
+    const [embed] = buildEmbed(baseData)
     expect(embed.data.title).toContain('Post')
   })
 
   it('account タイプのタイトルを含む', () => {
-    const embed = buildEmbed({ ...baseData, type: 'account' })
+    const [embed] = buildEmbed({ ...baseData, type: 'account' })
     expect(embed.data.title).toContain('Account')
   })
 
   it('story タイプのタイトルを含む', () => {
-    const embed = buildEmbed({ ...baseData, type: 'story' })
+    const [embed] = buildEmbed({ ...baseData, type: 'story' })
     expect(embed.data.title).toContain('Story')
   })
 
   it('video タイプのタイトルを含む', () => {
-    const embed = buildEmbed({ ...baseData, type: 'video' })
+    const [embed] = buildEmbed({ ...baseData, type: 'video' })
     expect(embed.data.title).toContain('Video')
+  })
+
+  it('複数画像の場合は追加 Embed を生成する', () => {
+    const data = { ...baseData, imageUrls: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg', 'https://example.com/img3.jpg'] }
+    const embeds = buildEmbed(data)
+
+    expect(embeds).toHaveLength(3)
+    expect(embeds[0]?.data.image?.url).toBe('https://example.com/img1.jpg')
+    expect(embeds[1]?.data.image?.url).toBe('https://example.com/img2.jpg')
+    expect(embeds[2]?.data.image?.url).toBe('https://example.com/img3.jpg')
+  })
+
+  it('追加 Embed は同じ URL を持つ', () => {
+    const data = { ...baseData, imageUrls: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg'] }
+    const embeds = buildEmbed(data)
+
+    expect(embeds[1]?.data.url).toBe('https://www.instagram.com/p/abc123/')
+  })
+
+  it('画像が 4 枚を超える場合は 4 件に制限する', () => {
+    const imageUrls = Array.from({ length: 6 }, (_, i) => `https://example.com/img${i}.jpg`)
+    const embeds = buildEmbed({ ...baseData, imageUrls })
+
+    expect(embeds).toHaveLength(4)
   })
 })
 
 describe('buildFallbackEmbed', () => {
   it('フォールバック Embed を返す', () => {
-    const embed = buildFallbackEmbed('https://www.instagram.com/p/abc123/')
+    const [embed] = buildFallbackEmbed('https://www.instagram.com/p/abc123/')
     expect(embed.data.title).toBe('Instagram')
     expect(embed.data.description).toBe('情報を取得できませんでした')
     expect(embed.data.url).toBe('https://www.instagram.com/p/abc123/')

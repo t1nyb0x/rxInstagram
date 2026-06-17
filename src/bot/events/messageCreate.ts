@@ -11,7 +11,7 @@ export const onMessageCreate = async (message: Message): Promise<void> => {
 
   if (!message.channel.isSendable()) return
 
-  const embeds = await Promise.all(
+  const embedGroups = await Promise.all(
     urls.map(async (url) => {
       const type = classifyUrl(url)
       if (type === 'unknown') return buildFallbackEmbed(url)
@@ -23,5 +23,5 @@ export const onMessageCreate = async (message: Message): Promise<void> => {
     }),
   )
 
-  await message.channel.send({ embeds })
+  await message.channel.send({ embeds: embedGroups.flat() })
 }

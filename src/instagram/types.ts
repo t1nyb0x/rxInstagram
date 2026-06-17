@@ -5,7 +5,7 @@ export interface InstagramData {
   url: string
   title: string
   description: string
-  imageUrl: string | null
+  imageUrls: string[]
   authorName: string
   publishedAt: string | null
 }

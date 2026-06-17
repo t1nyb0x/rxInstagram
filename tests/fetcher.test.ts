@@ -29,7 +29,7 @@ describe('fetchInstagramData', () => {
     expect(result.type).toBe('post')
     expect(result.title).toBe('testuser on Instagram')
     expect(result.description).toBe('テストキャプションです')
-    expect(result.imageUrl).toBe('https://example.com/image.jpg')
+    expect(result.imageUrls).toEqual(['https://example.com/image.jpg'])
     expect(result.publishedAt).toBe('2024-01-15T12:00:00.000Z')
   })
 
@@ -42,7 +42,7 @@ describe('fetchInstagramData', () => {
 
     expect(result.type).toBe('account')
     expect(result.title).toBe('testuser (@testuser) • Instagram')
-    expect(result.imageUrl).toBe('https://example.com/avatar.jpg')
+    expect(result.imageUrls).toEqual(['https://example.com/avatar.jpg'])
     expect(result.publishedAt).toBeNull()
   })
 
@@ -52,7 +52,7 @@ describe('fetchInstagramData', () => {
 
     expect(result.title).toBe('Instagram')
     expect(result.description).toBe('')
-    expect(result.imageUrl).toBeNull()
+    expect(result.imageUrls).toEqual([])
     expect(result.publishedAt).toBeNull()
   })
 
@@ -61,7 +61,7 @@ describe('fetchInstagramData', () => {
     const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
 
     expect(result.title).toBe('Instagram')
-    expect(result.imageUrl).toBeNull()
+    expect(result.imageUrls).toEqual([])
   })
 
   it('authorName を URL から取得する（account）', async () => {
@@ -77,5 +77,22 @@ describe('fetchInstagramData', () => {
     mockFetch(fixture('post.html'))
     const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
     expect(result.authorName).toBe('testuser')
+  })
+
+  it('カルーセル投稿の複数画像を全件取得する', async () => {
+    mockFetch(fixture('carousel.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.imageUrls).toHaveLength(3)
+    expect(result.imageUrls[0]).toBe('https://cdn.instagram.com/img1.jpg?stp=dst-jpg_e35')
+    expect(result.imageUrls[1]).toBe('https://cdn.instagram.com/img2.jpg?stp=dst-jpg_e35')
+    expect(result.imageUrls[2]).toBe('https://cdn.instagram.com/img3.jpg?stp=dst-jpg_e35')
+  })
+
+  it('display_uri がない場合は og:image にフォールバックする', async () => {
+    mockFetch(fixture('post.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.imageUrls).toEqual(['https://example.com/image.jpg'])
   })
 })

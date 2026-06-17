@@ -11,25 +11,38 @@ const TYPE_LABELS: Record<UrlType, string> = {
 }
 
 const BRAND_COLOR = 0xe1306c
+const MAX_EMBEDS = 4
 
-export const buildEmbed = (data: InstagramData): EmbedBuilder => {
+export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
   const label = TYPE_LABELS[data.type]
-  const embed = new EmbedBuilder()
+  const [firstImage, ...restImages] = data.imageUrls
+
+  const main = new EmbedBuilder()
     .setTitle(`Instagram ${label}`)
     .setURL(data.url)
     .setDescription(data.description || null)
     .setAuthor({ name: data.authorName })
     .setColor(BRAND_COLOR)
 
-  if (data.imageUrl) embed.setImage(data.imageUrl)
-  if (data.publishedAt) embed.setTimestamp(new Date(data.publishedAt))
+  if (firstImage) main.setImage(firstImage)
+  if (data.publishedAt) main.setTimestamp(new Date(data.publishedAt))
 
-  return embed
+  const additional = restImages
+    .slice(0, MAX_EMBEDS - 1)
+    .map((imageUrl) =>
+      new EmbedBuilder()
+        .setURL(data.url)
+        .setImage(imageUrl)
+        .setColor(BRAND_COLOR),
+    )
+
+  return [main, ...additional]
 }
 
-export const buildFallbackEmbed = (url: string): EmbedBuilder =>
+export const buildFallbackEmbed = (url: string): EmbedBuilder[] => [
   new EmbedBuilder()
     .setTitle('Instagram')
     .setURL(url)
     .setDescription('情報を取得できませんでした')
-    .setColor(BRAND_COLOR)
+    .setColor(BRAND_COLOR),
+]
