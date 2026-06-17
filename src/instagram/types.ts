@@ -8,4 +8,6 @@ export interface InstagramData {
   imageUrls: string[]
   authorName: string
   publishedAt: string | null
+  likeCount: number | null
+  commentCount: number | null
 }

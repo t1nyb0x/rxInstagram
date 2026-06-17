@@ -30,7 +30,25 @@ describe('fetchInstagramData', () => {
     expect(result.title).toBe('testuser on Instagram')
     expect(result.description).toBe('テストキャプションです')
     expect(result.imageUrls).toEqual(['https://example.com/image.jpg'])
-    expect(result.publishedAt).toBe('2024-01-15T12:00:00.000Z')
+    expect(result.publishedAt).toBe(new Date(1747439400 * 1000).toISOString())
+    expect(result.likeCount).toBe(3320)
+    expect(result.commentCount).toBe(12)
+  })
+
+  it('description から自動生成プレフィックスを除去する', async () => {
+    mockFetch(fixture('post.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.description).not.toContain('likes')
+    expect(result.description).not.toContain('comments')
+    expect(result.description).toBe('テストキャプションです')
+  })
+
+  it('taken_at から publishedAt を生成する', async () => {
+    mockFetch(fixture('post.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.publishedAt).toBe(new Date(1747439400 * 1000).toISOString())
   })
 
   it('アカウントページの OGP を正しくパースする', async () => {
@@ -54,6 +72,8 @@ describe('fetchInstagramData', () => {
     expect(result.description).toBe('')
     expect(result.imageUrls).toEqual([])
     expect(result.publishedAt).toBeNull()
+    expect(result.likeCount).toBeNull()
+    expect(result.commentCount).toBeNull()
   })
 
   it('HTTP エラー時はフォールバックデータを返す', async () => {
