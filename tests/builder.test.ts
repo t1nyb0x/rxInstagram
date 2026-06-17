@@ -10,6 +10,8 @@ const baseData: InstagramData = {
   imageUrls: ['https://example.com/image.jpg'],
   authorName: 'testuser',
   publishedAt: '2024-01-15T12:00:00.000Z',
+  likeCount: null,
+  commentCount: null,
 }
 
 describe('buildEmbed', () => {
@@ -33,14 +35,14 @@ describe('buildEmbed', () => {
     expect(embed.data.url).toBe('https://www.instagram.com/p/abc123/')
   })
 
-  it('publishedAt がある場合は timestamp として含む', () => {
+  it('publishedAt がある場合は footer に日時を表示する', () => {
     const [embed] = buildEmbed(baseData)
-    expect(embed.data.timestamp).toBe('2024-01-15T12:00:00.000Z')
+    expect(embed.data.footer?.text).toBe('2024/01/15 21:00')
   })
 
-  it('publishedAt が null の場合は timestamp を含まない', () => {
+  it('publishedAt が null の場合は footer を含まない', () => {
     const [embed] = buildEmbed({ ...baseData, publishedAt: null })
-    expect(embed.data.timestamp).toBeUndefined()
+    expect(embed.data.footer).toBeUndefined()
   })
 
   it('imageUrls が空の場合は image を含まない', () => {
@@ -73,6 +75,24 @@ describe('buildEmbed', () => {
     expect(embed.data.title).toContain('Video')
   })
 
+  it('likeCount と commentCount を fields として含む', () => {
+    const [embed] = buildEmbed({ ...baseData, likeCount: 3320, commentCount: 12 })
+    const fields = embed.data.fields ?? []
+    expect(fields.find((f) => f.name === 'いいね')?.value).toBe('3,320')
+    expect(fields.find((f) => f.name === 'コメント')?.value).toBe('12')
+  })
+
+  it('1万以上のいいね数を万単位でフォーマットする', () => {
+    const [embed] = buildEmbed({ ...baseData, likeCount: 12345, commentCount: null })
+    const fields = embed.data.fields ?? []
+    expect(fields.find((f) => f.name === 'いいね')?.value).toBe('1.2万')
+  })
+
+  it('likeCount が null の場合は field を含まない', () => {
+    const [embed] = buildEmbed({ ...baseData, likeCount: null, commentCount: null })
+    expect(embed.data.fields ?? []).toHaveLength(0)
+  })
+
   it('複数画像の場合は追加 Embed を生成する', () => {
     const data = { ...baseData, imageUrls: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg', 'https://example.com/img3.jpg'] }
     const embeds = buildEmbed(data)
@@ -95,6 +115,20 @@ describe('buildEmbed', () => {
     const embeds = buildEmbed({ ...baseData, imageUrls })
 
     expect(embeds).toHaveLength(4)
+  })
+
+  it('5 枚以上ある場合は最後の Embed に残り枚数を表示する', () => {
+    const imageUrls = Array.from({ length: 7 }, (_, i) => `https://example.com/img${i}.jpg`)
+    const embeds = buildEmbed({ ...baseData, imageUrls })
+
+    expect(embeds[3]?.data.footer?.text).toBe('他 3 枚')
+  })
+
+  it('4 枚以下の場合は footer を表示しない', () => {
+    const imageUrls = Array.from({ length: 4 }, (_, i) => `https://example.com/img${i}.jpg`)
+    const embeds = buildEmbed({ ...baseData, imageUrls })
+
+    expect(embeds[3]?.data.footer).toBeUndefined()
   })
 })
 

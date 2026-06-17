@@ -9,6 +9,8 @@ const FALLBACK = (url: string, type: UrlType): InstagramData => ({
   imageUrls: [],
   authorName: parseAuthorFromUrl(url, type),
   publishedAt: null,
+  likeCount: null,
+  commentCount: null,
 })
 
 const parseAuthorFromUrl = (url: string, type: UrlType): string => {
@@ -38,6 +40,18 @@ const extractImageUrls = (html: string, ogImage: string): string[] => {
   return urls.length > 0 ? urls : (ogImage ? [ogImage] : [])
 }
 
+const extractNumber = (html: string, key: string): number | null => {
+  const match = html.match(new RegExp(`"${key}":(\\d+)`))
+  return match?.[1] !== undefined ? Number(match[1]) : null
+}
+
+// og:description の形式: "{date}、{N} likes, {N} comments - {username}: "{caption}"
+const extractCaption = (description: string): string => {
+  const match = description.match(/- [^:]+:\s*"?([\s\S]+)$/)
+  if (!match?.[1]) return description
+  return match[1].replace(/[".]$/, '').trim()
+}
+
 export const fetchInstagramData = async (
   url: string,
   type: UrlType,
@@ -58,15 +72,20 @@ export const fetchInstagramData = async (
     const $ = cheerio.load(html)
 
     const title = ogMeta($, 'og:title')
-    const description = ogMeta($, 'og:description')
+    const rawDescription = ogMeta($, 'og:description')
+    const description = extractCaption(rawDescription)
     const ogImage = ogMeta($, 'og:image')
-    const publishedAt = ogMeta($, 'article:published_time') || null
     const imageUrls = extractImageUrls(html, ogImage)
+    const likeCount = extractNumber(html, 'like_count')
+    const commentCount = extractNumber(html, 'comment_count')
+
+    const takenAt = extractNumber(html, 'taken_at')
+    const publishedAt = takenAt ? new Date(takenAt * 1000).toISOString() : null
 
     const authorName =
       title ? parseAuthorFromTitle(title) : parseAuthorFromUrl(url, type)
 
-    return { type, url, title: title || 'Instagram', description, imageUrls, authorName, publishedAt }
+    return { type, url, title: title || 'Instagram', description, imageUrls, authorName, publishedAt, likeCount, commentCount }
   } catch {
     return FALLBACK(url, type)
   }

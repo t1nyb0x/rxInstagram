@@ -13,9 +13,25 @@ const TYPE_LABELS: Record<UrlType, string> = {
 const BRAND_COLOR = 0xe1306c
 const MAX_EMBEDS = 4
 
+const formatCount = (n: number): string =>
+  n >= 10000
+    ? `${(n / 10000).toFixed(1)}万`
+    : n.toLocaleString('ja-JP')
+
+const formatDate = (iso: string): string =>
+  new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Tokyo',
+  }).format(new Date(iso))
+
 export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
   const label = TYPE_LABELS[data.type]
   const [firstImage, ...restImages] = data.imageUrls
+  const remaining = data.imageUrls.length - MAX_EMBEDS
 
   const main = new EmbedBuilder()
     .setTitle(`Instagram ${label}`)
@@ -25,16 +41,27 @@ export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
     .setColor(BRAND_COLOR)
 
   if (firstImage) main.setImage(firstImage)
-  if (data.publishedAt) main.setTimestamp(new Date(data.publishedAt))
+  if (data.publishedAt) main.setFooter({ text: formatDate(data.publishedAt) })
 
-  const additional = restImages
-    .slice(0, MAX_EMBEDS - 1)
-    .map((imageUrl) =>
-      new EmbedBuilder()
-        .setURL(data.url)
-        .setImage(imageUrl)
-        .setColor(BRAND_COLOR),
-    )
+  const fields = []
+  if (data.likeCount !== null) fields.push({ name: 'いいね', value: formatCount(data.likeCount), inline: true })
+  if (data.commentCount !== null) fields.push({ name: 'コメント', value: formatCount(data.commentCount), inline: true })
+  if (fields.length > 0) main.addFields(fields)
+
+  const additionalImages = restImages.slice(0, MAX_EMBEDS - 1)
+  const additional = additionalImages.map((imageUrl, index) => {
+    const embed = new EmbedBuilder()
+      .setURL(data.url)
+      .setImage(imageUrl)
+      .setColor(BRAND_COLOR)
+
+    const isLast = index === additionalImages.length - 1
+    if (isLast && remaining > 0) {
+      embed.setFooter({ text: `他 ${remaining} 枚` })
+    }
+
+    return embed
+  })
 
   return [main, ...additional]
 }
