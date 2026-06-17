@@ -45,6 +45,13 @@ describe('buildEmbed', () => {
     expect(embed.data.footer).toBeUndefined()
   })
 
+  it('5 枚以上ある場合は残り枚数をメイン Embed の footer に表示する', () => {
+    const imageUrls = Array.from({ length: 7 }, (_, i) => `https://example.com/img${i}.jpg`)
+    const [embed] = buildEmbed({ ...baseData, imageUrls })
+    expect(embed.data.footer?.text).toContain('他 3 枚')
+    expect(embed.data.footer?.text).toContain('2024/01/15 21:00')
+  })
+
   it('imageUrls が空の場合は image を含まない', () => {
     const [embed] = buildEmbed({ ...baseData, imageUrls: [] })
     expect(embed.data.image).toBeUndefined()
@@ -117,18 +124,10 @@ describe('buildEmbed', () => {
     expect(embeds).toHaveLength(4)
   })
 
-  it('5 枚以上ある場合は最後の Embed に残り枚数を表示する', () => {
-    const imageUrls = Array.from({ length: 7 }, (_, i) => `https://example.com/img${i}.jpg`)
-    const embeds = buildEmbed({ ...baseData, imageUrls })
-
-    expect(embeds[3]?.data.footer?.text).toBe('他 3 枚')
-  })
-
-  it('4 枚以下の場合は footer を表示しない', () => {
+  it('4 枚以下の場合は残り枚数を footer に含まない', () => {
     const imageUrls = Array.from({ length: 4 }, (_, i) => `https://example.com/img${i}.jpg`)
-    const embeds = buildEmbed({ ...baseData, imageUrls })
-
-    expect(embeds[3]?.data.footer).toBeUndefined()
+    const [embed] = buildEmbed({ ...baseData, imageUrls })
+    expect(embed.data.footer?.text).not.toContain('他')
   })
 })
 

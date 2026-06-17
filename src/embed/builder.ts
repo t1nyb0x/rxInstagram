@@ -41,7 +41,11 @@ export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
     .setColor(BRAND_COLOR)
 
   if (firstImage) main.setImage(firstImage)
-  if (data.publishedAt) main.setFooter({ text: formatDate(data.publishedAt) })
+
+  const footerParts: string[] = []
+  if (remaining > 0) footerParts.push(`他 ${remaining} 枚`)
+  if (data.publishedAt) footerParts.push(formatDate(data.publishedAt))
+  if (footerParts.length > 0) main.setFooter({ text: footerParts.join(' • ') })
 
   const fields = []
   if (data.likeCount !== null) fields.push({ name: 'いいね', value: formatCount(data.likeCount), inline: true })
@@ -49,19 +53,12 @@ export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
   if (fields.length > 0) main.addFields(fields)
 
   const additionalImages = restImages.slice(0, MAX_EMBEDS - 1)
-  const additional = additionalImages.map((imageUrl, index) => {
-    const embed = new EmbedBuilder()
+  const additional = additionalImages.map((imageUrl) =>
+    new EmbedBuilder()
       .setURL(data.url)
       .setImage(imageUrl)
-      .setColor(BRAND_COLOR)
-
-    const isLast = index === additionalImages.length - 1
-    if (isLast && remaining > 0) {
-      embed.setFooter({ text: `他 ${remaining} 枚` })
-    }
-
-    return embed
-  })
+      .setColor(BRAND_COLOR),
+  )
 
   return [main, ...additional]
 }
