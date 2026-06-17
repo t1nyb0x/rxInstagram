@@ -1,0 +1,27 @@
+{
+  "name": "rxinstagram",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc && tsc-alias",
+    "start": "node dist/bot/client.js",
+    "dev": "node --watch --experimental-transform-types src/bot/client.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint src tests",
+    "fmt": "oxfmt src tests"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "discord.js": "^14.26.4",
+    "undici": "^8.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0",
+    "tsc-alias": "^1.8.17",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  }
+}
