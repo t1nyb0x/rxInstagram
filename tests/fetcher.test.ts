@@ -99,6 +99,63 @@ describe('fetchInstagramData', () => {
     expect(result.authorName).toBe('testuser')
   })
 
+  it('Instagram photo by 形式の og:title から authorName を取得する', async () => {
+    mockFetch(`
+      <html>
+        <head>
+          <meta property="og:title" content="Instagram photo by testuser • May 17, 2026 at 10:30 PM" />
+          <meta property="og:description" content="テストキャプションです" />
+        </head>
+      </html>
+    `)
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.authorName).toBe('testuser')
+    expect(result.description).toBe('テストキャプションです')
+  })
+
+  it('@username を含む og:title から authorName を取得する', async () => {
+    mockFetch(`
+      <html>
+        <head>
+          <meta property="og:title" content="Instagram reel by @test.user • Original audio" />
+          <meta property="og:description" content="リールのキャプションです" />
+        </head>
+      </html>
+    `)
+    const result = await fetchInstagramData('https://www.instagram.com/reel/abc123/', 'reel')
+
+    expect(result.authorName).toBe('test.user')
+  })
+
+  it('Instagram Reel by 形式の og:title から authorName を取得する', async () => {
+    mockFetch(`
+      <html>
+        <head>
+          <meta property="og:title" content="Instagram Reel by testuser • June 19, 2026" />
+          <meta property="og:description" content="リールのキャプションです" />
+        </head>
+      </html>
+    `)
+    const result = await fetchInstagramData('https://www.instagram.com/reel/abc123/', 'reel')
+
+    expect(result.authorName).toBe('testuser')
+  })
+
+  it('- Instagram 形式の og:title から表示名を取得する', async () => {
+    mockFetch(`
+      <html>
+        <head>
+          <meta property="og:title" content="MUSIC AWARDS JAPAN / CEIPA - Instagram" />
+          <meta property="og:description" content="プロフィール説明文" />
+        </head>
+      </html>
+    `)
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.authorName).toBe('MUSIC AWARDS JAPAN / CEIPA')
+  })
+
   it('カルーセル投稿の複数画像を全件取得する', async () => {
     mockFetch(fixture('carousel.html'))
     const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
