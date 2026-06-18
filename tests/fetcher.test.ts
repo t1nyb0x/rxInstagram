@@ -115,4 +115,26 @@ describe('fetchInstagramData', () => {
 
     expect(result.imageUrls).toEqual(['https://example.com/image.jpg'])
   })
+
+  it('fetch が例外をスローした場合はフォールバックデータを返す', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')))
+    const result = await fetchInstagramData('https://www.instagram.com/p/abc123/', 'post')
+
+    expect(result.title).toBe('Instagram')
+    expect(result.imageUrls).toEqual([])
+  })
+
+  it('account タイプで OGP が取得できない場合は URL から authorName を取得する', async () => {
+    mockFetch(fixture('empty.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/testuser/', 'account')
+
+    expect(result.authorName).toBe('testuser')
+  })
+
+  it('story タイプで OGP が取得できない場合は URL から authorName を取得する', async () => {
+    mockFetch(fixture('empty.html'))
+    const result = await fetchInstagramData('https://www.instagram.com/stories/testuser/12345/', 'story')
+
+    expect(result.authorName).toBe('testuser')
+  })
 })
