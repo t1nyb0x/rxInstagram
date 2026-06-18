@@ -100,6 +100,11 @@ describe('buildEmbed', () => {
     expect(embed.data.fields ?? []).toHaveLength(0)
   })
 
+  it('description が空の場合は description を含まない', () => {
+    const [embed] = buildEmbed({ ...baseData, description: '' })
+    expect(embed.data.description).toBeUndefined()
+  })
+
   it('複数画像の場合は追加 Embed を生成する', () => {
     const data = { ...baseData, imageUrls: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg', 'https://example.com/img3.jpg'] }
     const embeds = buildEmbed(data)
