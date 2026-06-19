@@ -25,8 +25,20 @@ const parseAuthorFromUrl = (url: string, type: UrlType): string => {
 };
 
 const parseAuthorFromTitle = (title: string): string => {
-  const match = title.match(/^([^(@\s]+)/);
-  return match?.[1]?.trim() ?? "";
+  const patterns = [
+    /\(@([A-Za-z0-9_.]+)\)/,
+    /^([A-Za-z0-9_.]+)\s+on Instagram\b/,
+    /\bby @?([A-Za-z0-9_.]+)\b/i,
+    /@([A-Za-z0-9_.]+)/,
+    /^(.+?)\s+-\s+Instagram\b/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = title.match(pattern);
+    if (match?.[1]) return match[1].trim();
+  }
+
+  return "";
 };
 
 const ogMeta = ($: ReturnType<typeof cheerio.load>, property: string): string =>

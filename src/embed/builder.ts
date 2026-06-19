@@ -26,17 +26,24 @@ const formatDate = (iso: string): string =>
     timeZone: "Asia/Tokyo",
   }).format(new Date(iso));
 
+const formatAuthorLabel = (authorName: string): string => {
+  if (!authorName) return "";
+  return /^[A-Za-z0-9_.]+$/.test(authorName) ? ` @${authorName}` : ` ${authorName}`;
+};
+
 export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
   const label = TYPE_LABELS[data.type];
+  const authorLabel = formatAuthorLabel(data.authorName);
   const [firstImage, ...restImages] = data.imageUrls;
   const remaining = data.imageUrls.length - MAX_EMBEDS;
 
   const main = new EmbedBuilder()
-    .setTitle(`Instagram ${label}`)
+    .setTitle(`Instagram ${label}${authorLabel}`)
     .setURL(data.url)
     .setDescription(data.description || null)
-    .setAuthor({ name: data.authorName })
     .setColor(BRAND_COLOR);
+
+  if (data.authorName) main.setAuthor({ name: data.authorName });
 
   if (firstImage) main.setImage(firstImage);
 

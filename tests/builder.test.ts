@@ -30,6 +30,11 @@ describe('buildEmbed', () => {
     expect(embed.data.author?.name).toBe('testuser')
   })
 
+  it('authorName が空の場合は author を含まない', () => {
+    const [embed] = buildEmbed({ ...baseData, authorName: '' })
+    expect(embed.data.author).toBeUndefined()
+  })
+
   it('URL を含む', () => {
     const [embed] = buildEmbed(baseData)
     expect(embed.data.url).toBe('https://www.instagram.com/p/abc123/')
@@ -64,7 +69,17 @@ describe('buildEmbed', () => {
 
   it('post タイプのタイトルを含む', () => {
     const [embed] = buildEmbed(baseData)
-    expect(embed.data.title).toContain('Post')
+    expect(embed.data.title).toBe('Instagram Post @testuser')
+  })
+
+  it('authorName が空の場合はタイトルに author を含まない', () => {
+    const [embed] = buildEmbed({ ...baseData, authorName: '' })
+    expect(embed.data.title).toBe('Instagram Post')
+  })
+
+  it('authorName が表示名の場合は @ を付けずにタイトルへ含める', () => {
+    const [embed] = buildEmbed({ ...baseData, authorName: 'MUSIC AWARDS JAPAN / CEIPA' })
+    expect(embed.data.title).toBe('Instagram Post MUSIC AWARDS JAPAN / CEIPA')
   })
 
   it('account タイプのタイトルを含む', () => {
