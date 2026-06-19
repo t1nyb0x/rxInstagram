@@ -12,6 +12,7 @@ const TYPE_LABELS: Record<UrlType, string> = {
 
 const BRAND_COLOR = 0xe1306c;
 const MAX_EMBEDS = 4;
+const HEADER_NOTICE = "詳細はInstagramで確認";
 
 const formatCount = (n: number): string =>
   n >= 10000 ? `${(n / 10000).toFixed(1)}万` : n.toLocaleString("ja-JP");
@@ -38,7 +39,7 @@ export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
   const remaining = data.imageUrls.length - MAX_EMBEDS;
 
   const main = new EmbedBuilder()
-    .setTitle(`Instagram ${label}${authorLabel}`)
+    .setTitle(`Instagram ${label}${authorLabel} / ${HEADER_NOTICE}`)
     .setURL(data.url)
     .setDescription(data.description || null)
     .setColor(BRAND_COLOR);
@@ -69,7 +70,7 @@ export const buildEmbed = (data: InstagramData): EmbedBuilder[] => {
 
 export const buildFallbackEmbed = (url: string): EmbedBuilder[] => [
   new EmbedBuilder()
-    .setTitle("Instagram")
+    .setTitle(`Instagram / ${HEADER_NOTICE}`)
     .setURL(url)
     .setDescription("情報を取得できませんでした")
     .setColor(BRAND_COLOR),
