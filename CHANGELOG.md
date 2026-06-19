@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/t1nyb0x/rx-instagram/compare/v1.0.0...v1.1.0) (2026-06-19)
+
+
+### Features
+
+* 各種調整 ([#4](https://github.com/t1nyb0x/rx-instagram/issues/4)) ([0077409](https://github.com/t1nyb0x/rx-instagram/commit/00774091c78a37a5b2ecf071e0547765b3521208))
+
 ## 1.0.0 (2026-06-18)
 
 
