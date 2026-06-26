@@ -1,6 +1,6 @@
 import type { Message } from "discord.js";
 import { buildEmbed, buildFallbackEmbed } from "@/embed/builder";
-import { classifyUrl, extractInstagramUrls } from "@/instagram/detector";
+import { classifyUrl, extractInstagramUrls, stripQueryParams } from "@/instagram/detector";
 import { fetchInstagramData } from "@/instagram/fetcher";
 
 export const onMessageCreate = async (message: Message): Promise<void> => {
@@ -11,8 +11,12 @@ export const onMessageCreate = async (message: Message): Promise<void> => {
 
   if (!message.channel.isSendable()) return;
 
+  const cleanUrls = urls.map(stripQueryParams);
+
+  await message.delete().catch(() => {});
+
   const embedGroups = await Promise.all(
-    urls.map(async (url) => {
+    cleanUrls.map(async (url) => {
       const type = classifyUrl(url);
       if (type === "unknown") return buildFallbackEmbed(url);
 

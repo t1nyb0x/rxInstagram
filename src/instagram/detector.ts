@@ -22,3 +22,9 @@ export const classifyUrl = (url: string): UrlType => {
   }
   return "unknown";
 };
+
+export const stripQueryParams = (url: string): string => {
+  const parsed = new URL(url);
+  parsed.search = "";
+  return parsed.toString();
+};
