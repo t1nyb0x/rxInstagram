@@ -61,6 +61,7 @@ messageCreate
 
 ### Embed の仕様
 
+- タイトル末尾に「詳細はInstagramで確認」を表示する
 - 画像は最大4枚（Discord の同一 URL グルーピング上限）
 - 5枚以上の場合はメイン Embed のフッターに「他 n 枚 • 日時」を表示
 - 日時は JST フォーマット（`Asia/Tokyo`）
