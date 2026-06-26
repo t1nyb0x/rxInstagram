@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1](https://github.com/t1nyb0x/rx-instagram/compare/v1.1.0...v1.1.1) (2026-06-26)
+
+
+### Bug Fixes
+
+* 投稿されたInstagramURLを削除かつ、クエリパラメータを削除した埋め込みURLを出すように変更 ([b26f766](https://github.com/t1nyb0x/rx-instagram/commit/b26f766a5656f83cbd74a176e35089d9f5243b29))
+* 投稿されたInstagramURLを削除かつ、クエリパラメータを削除した埋め込みURLを出すように変更 ([a05a272](https://github.com/t1nyb0x/rx-instagram/commit/a05a272d7a4ef9ae74d1cb30fc61990c200298f5))
+
 ## [1.1.0](https://github.com/t1nyb0x/rx-instagram/compare/v1.0.0...v1.1.0) (2026-06-19)
 
 
