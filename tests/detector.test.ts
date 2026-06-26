@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { classifyUrl, extractInstagramUrls } from '../src/instagram/detector.ts'
+import { classifyUrl, extractInstagramUrls, stripQueryParams } from '../src/instagram/detector.ts'
 
 describe('extractInstagramUrls', () => {
   it('メッセージから Instagram URL を抽出する', () => {
@@ -59,5 +59,25 @@ describe('classifyUrl', () => {
 
   it('クエリパラメータ付き URL も正しく分類する', () => {
     expect(classifyUrl('https://www.instagram.com/p/abc123/?igsh=xxx')).toBe('post')
+  })
+})
+
+describe('stripQueryParams', () => {
+  it('クエリパラメータを除去する', () => {
+    expect(stripQueryParams('https://www.instagram.com/p/abc123/?igsh=xxx')).toBe(
+      'https://www.instagram.com/p/abc123/',
+    )
+  })
+
+  it('複数のクエリパラメータを除去する', () => {
+    expect(
+      stripQueryParams('https://www.instagram.com/p/abc123/?igsh=xxx&utm_source=ig_web_copy_link'),
+    ).toBe('https://www.instagram.com/p/abc123/')
+  })
+
+  it('クエリパラメータがない URL はそのまま返す', () => {
+    expect(stripQueryParams('https://www.instagram.com/p/abc123/')).toBe(
+      'https://www.instagram.com/p/abc123/',
+    )
   })
 })
